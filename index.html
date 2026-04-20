@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Metalófono - Semana de la Educación Artística</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --navy-blue: #0f3d61; 
+            --light-blue: #e1f5fe;
+            --white: #ffffff;
+            --wood: #5d4037;
+            --font-main: 'Nunito', sans-serif;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0; padding: 0;
+            background: var(--light-blue);
+            font-family: var(--font-main);
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* --- HEADER CON DOBLE LOGO --- */
+        header {
+            height: 100px; background: var(--white);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; border-bottom: 4px solid var(--navy-blue);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100;
+        }
+
+        .membrete-escuela { height: 70px; object-fit: contain; }
+        .logo-sea { height: 80px; object-fit: contain; }
+
+        #btn-back {
+            background: #ff5252; color: white; border: none; padding: 8px 15px;
+            border-radius: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 4px #c62828;
+        }
+        #btn-back:active { transform: translateY(2px); box-shadow: 0 2px #c62828; }
+
+        /* --- MENÚ PRINCIPAL (NUBES CORREGIDAS) --- */
+        #menu-overlay {
+            position: fixed; inset: 100px 0 0 0; background: var(--light-blue);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 200; gap: 20px;
+        }
+        #menu-overlay.hidden { display: none; }
+
+        .instruction {
+            color: var(--navy-blue); font-size: 1.5rem; font-weight: 900;
+            background: white; padding: 10px 30px; border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+        }
+
+        /* Nube Proporcionada y Estable */
+        .cloud-btn {
+            position: relative; width: 280px; height: 90px;
+            background: white; border-radius: 100px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .cloud-btn:hover { transform: scale(1.05); }
+        .cloud-btn::before, .cloud-btn::after {
+            content: ''; position: absolute; background: white; border-radius: 50%;
+        }
+        .cloud-btn::before { width: 100px; height: 100px; top: -45px; left: 35px; }
+        .cloud-btn::after { width: 130px; height: 130px; top: -65px; right: 35px; }
+
+        .cloud-text {
+            position: relative; z-index: 10; color: var(--navy-blue);
+            font-size: 1.8rem; font-weight: 900; display: flex; align-items: center; gap: 10px;
+        }
+
+        /* --- INTERFAZ DE JUEGO --- */
+        #game-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        #hint-text {
+            font-size: 1.8rem; font-weight: 900; color: var(--navy-blue);
+            margin-bottom: 10px; background: white; padding: 5px 25px; border-radius: 30px;
+        }
+
+        #progression { display: flex; gap: 8px; margin-bottom: 20px; }
+        .star { font-size: 1.5rem; color: #ccc; transition: 0.3s; }
+        .star.now { color: var(--navy-blue); transform: scale(1.4); }
+        .star.done { color: #ffca28; }
+
+        #instrument-case {
+            width: 100%; max-width: 900px; height: 45vh;
+            background: var(--wood); border-radius: 20px;
+            padding: 20px; display: flex; gap: 10px;
+            border: 6px solid #3e2723; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .note-wrapper {
+            flex: 1; display: flex; flex-direction: column; align-items: center;
+            position: relative; transition: 0.1s;
+        }
+        .bar {
+            width: 100%; border-radius: 8px; cursor: pointer;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 20px; box-shadow: inset 0 5px 15px rgba(255,255,255,0.4), 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .bar span { color: white; font-weight: 900; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        
+        .note-wrapper.press { transform: translateY(10px); }
+
+        /* Colores de las notas */
+        .bar[data-n="0"] { background: #f44336; height: 100%; }
+        .bar[data-n="1"] { background: #ff9800; height: 93%; }
+        .bar[data-n="2"] { background: #ffeb3b; height: 86%; }
+        .bar[data-n="3"] { background: #4caf50; height: 79%; }
+        .bar[data-n="4"] { background: #2196f3; height: 72%; }
+        .bar[data-n="5"] { background: #3f51b5; height: 65%; }
+        .bar[data-n="6"] { background: #9c27b0; height: 58%; }
+        .bar[data-n="7"] { background: #f44336; height: 51%; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="logo_escuela.jpg" alt="Escuela" class="membrete-escuela">
+    <img src="logo_header.jpg" alt="SEA" class="logo-sea">
+    <button id="btn-back" class="hidden" onclick="location.reload()">VOLVER</button>
+</header>
+
+<div id="menu-overlay">
+    <p class="instruction">Selecciona una canción:</p>
+    <div class="cloud-btn" onclick="start('estrellita')"><div class="cloud-text">⭐ Estrellita</div></div>
+    <div class="cloud-btn" onclick="start('jacobo')"><div class="cloud-text">🔔 Fray Jacobo</div></div>
+    <div class="cloud-btn" onclick="start('himno')"><div class="cloud-text">🎶 Alegría</div></div>
+</div>
+
+<div id="game-view">
+    <div id="hint-text">¡A tocar!</div>
+    <div id="progression"></div>
+    <div id="instrument-case">
+        <div class="note-wrapper" data-id="0"><div class="bar" data-n="0"><span>DO</span></div></div>
+        <div class="note-wrapper" data-id="1"><div class="bar" data-n="1"><span>RE</span></div></div>
+        <div class="note-wrapper" data-id="2"><div class="bar" data-n="2"><span>MI</span></div></div>
+        <div class="note-wrapper" data-id="3"><div class="bar" data-n="3"><span>FA</span></div></div>
+        <div class="note-wrapper" data-id="4"><div class="bar" data-n="4"><span>SOL</span></div></div>
+        <div class="note-wrapper" data-id="5"><div class="bar" data-n="5"><span>LA</span></div></div>
+        <div class="note-wrapper" data-id="6"><div class="bar" data-n="6"><span>SI</span></div></div>
+        <div class="note-wrapper" data-id="7"><div class="bar" data-n="7"><span>DO</span></div></div>
+    </div>
+</div>
+
+<script>
+    const AudioEngine = {
+        ctx: null,
+        // Octava Soprano (Frecuencias altas para sonar a metalófono)
+        freqs: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
+        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+        play(i) {
+            this.init();
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(this.freqs[i], now);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+            osc.connect(gain).connect(this.ctx.destination);
+            osc.start(); osc.stop(now + 1.6);
+        }
+    };
+
+    const Songs = {
+        estrellita: [[0,0,4,4,5,5,4], [3,3,2,2,1,1,0], [4,4,3,3,2,2,1], [4,4,3,3,2,2,1], [0,0,4,4,5,5,4], [3,3,2,2,1,1,0]],
+        jacobo: [[0,1,2,0], [0,1,2,0], [2,3,4], [2,3,4], [4,5,4,3,2,0], [4,5,4,3,2,0], [0,4,0], [0,4,0]],
+        himno: [[2,2,3,4,4,3,2,1,0,0,1,2,2,1,1], [2,2,3,4,4,3,2,1,0,0,1,2,1,0,0]]
+    };
+
+    let currentSong = [], pIdx = 0, nIdx = 0, active = false;
+
+    function start(key) {
+        document.getElementById('menu-overlay').classList.add('hidden');
+        document.getElementById('btn-back').classList.remove('hidden');
+        currentSong = Songs[key];
+        pIdx = 0;
+        renderStars();
+        playSequence();
+    }
+
+    function renderStars() {
+        const container = document.getElementById('progression');
+        container.innerHTML = '';
+        currentSong.forEach((_, i) => {
+            const s = document.createElement('span');
+            s.className = 'star'; s.id = `s-${i}`; s.innerHTML = '★';
+            container.appendChild(s);
+        });
+    }
+
+    async function playSequence() {
+        active = false; nIdx = 0;
+        document.getElementById(`s-${pIdx}`).classList.add('now');
+        document.getElementById('hint-text').innerText = "🎧 ¡Escucha!";
+        await new Promise(r => setTimeout(r, 1000));
+        for (let note of currentSong[pIdx]) {
+            triggerKey(note, 400);
+            await new Promise(r => setTimeout(r, 600));
+        }
+        active = true;
+        document.getElementById('hint-text').innerText = "🎹 ¡Tu turno!";
+    }
+
+    function triggerKey(i, time) {
+        AudioEngine.play(i);
+        const el = document.querySelector(`.note-wrapper[data-id="${i}"]`);
+        el.classList.add('press');
+        setTimeout(() => el.classList.remove('press'), time);
+    }
+
+    document.querySelectorAll('.note-wrapper').forEach(btn => {
+        btn.addEventListener('pointerdown', () => {
+            if (!active) return;
+            const n = parseInt(btn.dataset.id);
+            triggerKey(n, 150);
+            if (n === currentSong[pIdx][nIdx]) {
+                nIdx++;
+                if (nIdx === currentSong[pIdx].length) {
+                    active = false;
+                    document.getElementById(`s-${pIdx}`).className = 'star done';
+                    pIdx++;
+                    if (pIdx === currentSong.length) {
+                        confetti();
+                        document.getElementById('hint-text').innerText = "🏆 ¡EXCELENTE!";
+                        setTimeout(() => location.reload(), 4000);
+                    } else {
+                        setTimeout(playSequence, 1000);
+                    }
+                }
+            } else {
+                nIdx = 0;
+                document.getElementById('hint-text').innerText = "❌ ¡Inténtalo de nuevo!";
+            }
+        });
+    });
+</script>
+</body>
+</html>
