@@ -28,7 +28,7 @@
         /* --- HEADER CON LOGO SUPERPUESTO --- */
         header {
             position: relative;
-            height: 140px; /* Más alto para acomodar el gran banner */
+            height: 140px; 
             background: var(--white);
             display: flex; align-items: center; justify-content: center;
             border-bottom: 4px solid var(--navy-blue);
@@ -36,7 +36,6 @@
             padding: 10px;
         }
 
-        /* Logo de la Escuela (Membrete arriba a la izquierda) */
         .membrete-escuela { 
             position: absolute;
             top: 15px;
@@ -44,13 +43,12 @@
             height: 90px; 
             object-fit: contain;
             z-index: 10;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); /* Sombra para que resalte sobre el fondo */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); 
         }
 
-        /* Gran Banner Central (Título) */
         .logo-sea { 
             height: 100%; 
-            max-width: 80%; /* Deja espacio para el escudo y el botón */
+            max-width: 80%; 
             object-fit: contain;
         }
 
@@ -64,21 +62,26 @@
         }
         #btn-back:active { transform: translateY(2px); box-shadow: 0 2px #c62828; }
 
-        /* --- MENÚ PRINCIPAL (NUBES ESTABLES) --- */
+        /* --- MENÚ PRINCIPAL --- */
         #menu-overlay {
             position: fixed; inset: 140px 0 0 0; background: var(--light-blue);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 200; gap: 20px;
+            z-index: 200; 
+            /* AQUÍ ESTÁ LA CORRECCIÓN: Separación ampliada para que las nubes no se toquen */
+            gap: 80px; 
+            overflow-y: auto; /* Por si la pantalla es pequeña, que se pueda hacer scroll */
+            padding: 20px 0 50px 0;
         }
         #menu-overlay.hidden { display: none; }
 
         .instruction {
             color: var(--navy-blue); font-size: 1.5rem; font-weight: 900;
             background: white; padding: 10px 30px; border-radius: 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+            margin-bottom: -20px; /* Acerca la instrucción un poco a la primera nube */
         }
 
-        /* Nube Proporcionada y Estable */
+        /* Nubes */
         .cloud-btn {
             position: relative; width: 280px; height: 90px;
             background: white; border-radius: 100px;
@@ -131,7 +134,6 @@
         
         .note-wrapper.press { transform: translateY(10px); }
 
-        /* Colores de las notas */
         .bar[data-n="0"] { background: #f44336; height: 100%; }
         .bar[data-n="1"] { background: #ff9800; height: 93%; }
         .bar[data-n="2"] { background: #ffeb3b; height: 86%; }
@@ -148,9 +150,7 @@
 
 <header>
     <img src="logo_escuela.jpg" alt="Escuela Santa Eugenia" class="membrete-escuela">
-    
     <img src="logo_header.jpg" alt="Semana de la Educación Artística" class="logo-sea">
-    
     <button id="btn-back" class="hidden" onclick="location.reload()">VOLVER</button>
 </header>
 
