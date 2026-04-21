@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Metalófono - Semana de la Educación Artística</title>
+    <title>Metalófono SEA - Escuela Santa Eugenia</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --navy-blue: #0f3d61; 
+            --navy-blue: #0f3d61; /* Color extraído del texto del logo */
             --light-blue: #e1f5fe;
             --white: #ffffff;
             --wood: #5d4037;
@@ -25,51 +25,73 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- HEADER CON LOGO SUPERPUESTO --- */
+        /* =========================================
+           CORRECCIÓN DEL HEADER: GIGANTE Y PROTAGÓNICO
+           ========================================= */
         header {
             position: relative;
-            height: 140px; 
-            background: var(--white);
-            display: flex; align-items: center; justify-content: center;
-            border-bottom: 4px solid var(--navy-blue);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); z-index: 100;
-            padding: 10px;
+            /* SE HA AGRANDADO DRÁSTICAMENTE LA ALTURA PARA DOMINAR LA PANTALLA */
+            height: 250px; 
+            background-color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centra el logo SEA principal */
+            border-bottom: 6px solid #ffca28; /* Línea dorada de acento */
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 100%;
+            overflow: hidden;
         }
 
+        /* 1. MEMBRETE ESCOLAR (Pequeño, esquina izquierda) */
         .membrete-escuela { 
             position: absolute;
-            top: 15px;
-            left: 20px;
-            height: 90px; 
+            top: 10px;
+            left: 10px;
+            height: 50px; /* Tamaño discreto institucional */
+            width: auto;
             object-fit: contain;
+            opacity: 0.8; /* Ligeramente sutil */
             z-index: 10;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); 
         }
 
+        /* 2. LOGO SEA PRINCIPAL (Protagónico, maximizado) */
         .logo-sea { 
+            /* Ocupa el 100% de la altura del gran header */
             height: 100%; 
-            max-width: 80%; 
-            object-fit: contain;
+            /* Se expande horizontalmente todo lo posible dentro de un margen seguro */
+            width: auto;
+            max-width: 90%; 
+            object-fit: contain; /* No se deforma */
+            padding: 15px;
+            /* Mayor realce visual */
+            filter: drop-shadow(0 6px 10px rgba(0,0,0,0.2));
+            transition: transform 0.3s ease;
         }
+        .logo-sea:hover { transform: scale(1.02); }
 
+        /* Botón Volver (Esquina derecha) */
         #btn-back {
             position: absolute;
             top: 20px;
             right: 20px;
-            background: #ff5252; color: white; border: none; padding: 8px 15px;
-            border-radius: 20px; font-weight: 800; cursor: pointer; box-shadow: 0 4px #c62828;
-            z-index: 10;
+            background: #ff5252; color: white; border: none; padding: 10px 20px;
+            border-radius: 30px; font-weight: 800; font-size: 1rem; cursor: pointer; 
+            box-shadow: 0 4px #c62828; z-index: 10;
+            transition: all 0.2s; font-family: var(--font-main);
         }
-        #btn-back:active { transform: translateY(2px); box-shadow: 0 2px #c62828; }
+        #btn-back:active { transform: translateY(4px); box-shadow: 0 0 #c62828; }
 
         /* --- MENÚ PRINCIPAL --- */
         #menu-overlay {
-            position: fixed; inset: 140px 0 0 0; background: var(--light-blue);
+            position: fixed; 
+            /* CORRECCIÓN: Se ha bajado el menú para que comience DEBAJO del nuevo header gigante */
+            inset: 250px 0 0 0; 
+            background: var(--light-blue);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 200; 
-            /* AQUÍ ESTÁ LA CORRECCIÓN: Separación ampliada para que las nubes no se toquen */
-            gap: 80px; 
-            overflow-y: auto; /* Por si la pantalla es pequeña, que se pueda hacer scroll */
+            gap: 80px; /* Separación amplia de nubes */
+            overflow-y: auto; 
             padding: 20px 0 50px 0;
         }
         #menu-overlay.hidden { display: none; }
@@ -79,15 +101,16 @@
             background: white; padding: 10px 30px; border-radius: 50px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
             margin-bottom: -20px; /* Acerca la instrucción un poco a la primera nube */
+            text-align: center;
         }
 
-        /* Nubes */
+        /* Nubes (CSS Puro, formas estables) */
         .cloud-btn {
             position: relative; width: 280px; height: 90px;
             background: white; border-radius: 100px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .cloud-btn:hover { transform: scale(1.05); }
         .cloud-btn::before, .cloud-btn::after {
@@ -102,47 +125,60 @@
         }
 
         /* --- INTERFAZ DE JUEGO --- */
-        #game-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #game-view { 
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; 
+            /* Se asegura de que el área de juego no se encime con el header */
+            margin-top: 20px; 
+        }
         
         #hint-text {
-            font-size: 1.8rem; font-weight: 900; color: var(--navy-blue);
-            margin-bottom: 10px; background: white; padding: 5px 25px; border-radius: 30px;
+            font-size: 2rem; font-weight: 900; color: var(--navy-blue);
+            margin-bottom: 15px; background: white; padding: 8px 30px; border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            min-height: 2.8rem; text-align: center;
         }
 
-        #progression { display: flex; gap: 8px; margin-bottom: 20px; }
-        .star { font-size: 1.5rem; color: #ccc; transition: 0.3s; }
-        .star.now { color: var(--navy-blue); transform: scale(1.4); }
+        #progression { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 90%; margin-bottom: 25px; }
+        .star { font-size: 1.6rem; color: #b0bec5; transition: 0.3s; }
+        .star.now { color: var(--navy-blue); transform: scale(1.6); text-shadow: 0 0 10px rgba(15, 61, 97, 0.3); }
         .star.done { color: #ffca28; }
 
         #instrument-case {
-            width: 100%; max-width: 900px; height: 45vh;
+            width: 100%; max-width: 900px; height: 45vh; min-height: 280px;
             background: var(--wood); border-radius: 20px;
             padding: 20px; display: flex; gap: 10px;
-            border: 6px solid #3e2723; box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 6px solid #3e2723; box-shadow: 0 20px 40px rgba(0,0,0,0.3), inset 0 5px 15px rgba(255,255,255,0.2);
+            position: relative;
         }
+        #instrument-case::before { content: ''; position: absolute; left: 10px; right: 10px; top: 35px; height: 8px; background: #111; border-radius: 4px; }
+        #instrument-case::after { content: ''; position: absolute; left: 10px; right: 10px; bottom: 35px; height: 8px; background: #111; border-radius: 4px; }
 
         .note-wrapper {
             flex: 1; display: flex; flex-direction: column; align-items: center;
-            position: relative; transition: 0.1s;
+            position: relative; transition: 0.1s; z-index: 10;
         }
         .bar {
-            width: 100%; border-radius: 8px; cursor: pointer;
+            width: 100%; border-radius: 12px; cursor: pointer;
             display: flex; align-items: flex-end; justify-content: center;
-            padding-bottom: 20px; box-shadow: inset 0 5px 15px rgba(255,255,255,0.4), 0 5px 10px rgba(0,0,0,0.3);
+            padding-bottom: 25px; 
+            box-shadow: inset 4px 4px 8px rgba(255,255,255,0.3), 0 5px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .bar span { color: white; font-weight: 900; font-size: 1.5rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .bar span { color: white; font-weight: 900; font-size: clamp(1rem, 4vw, 2.5rem); text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
         
-        .note-wrapper.press { transform: translateY(10px); }
+        .note-wrapper.press { transform: translateY(10px) scale(0.97); }
 
         .bar[data-n="0"] { background: #f44336; height: 100%; }
         .bar[data-n="1"] { background: #ff9800; height: 93%; }
         .bar[data-n="2"] { background: #ffeb3b; height: 86%; }
         .bar[data-n="3"] { background: #4caf50; height: 79%; }
-        .bar[data-n="4"] { background: #2196f3; height: 72%; }
+        .bar[data-n="4"] { background: #2196f3; height: 72%; } /* SOL */
         .bar[data-n="5"] { background: #3f51b5; height: 65%; }
         .bar[data-n="6"] { background: #9c27b0; height: 58%; }
         .bar[data-n="7"] { background: #f44336; height: 51%; }
 
+        @keyframes shake-ui { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(10px); } 60% { transform: translateX(-10px); } 80% { transform: translateX(10px); } }
+        .shake { animation: shake-ui 0.4s ease-in-out; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -150,12 +186,14 @@
 
 <header>
     <img src="logo_escuela.jpg" alt="Escuela Santa Eugenia" class="membrete-escuela">
+    
     <img src="logo_header.jpg" alt="Semana de la Educación Artística" class="logo-sea">
+    
     <button id="btn-back" class="hidden" onclick="location.reload()">VOLVER</button>
 </header>
 
 <div id="menu-overlay">
-    <p class="instruction">Selecciona una canción:</p>
+    <p class="instruction">¡Elige tu canción para empezar!</p>
     <div class="cloud-btn" onclick="start('estrellita')"><div class="cloud-text">⭐ Estrellita</div></div>
     <div class="cloud-btn" onclick="start('jacobo')"><div class="cloud-text">🔔 Fray Jacobo</div></div>
     <div class="cloud-btn" onclick="start('himno')"><div class="cloud-text">🎶 Alegría</div></div>
@@ -179,19 +217,23 @@
 <script>
     const AudioEngine = {
         ctx: null,
+        // Octava Soprano (Frecuencias agudas para metalófono)
         freqs: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
         init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
         play(i) {
             this.init();
             const now = this.ctx.currentTime;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(this.freqs[i], now);
-            gain.gain.setValueAtTime(0.5, now);
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
-            osc.connect(gain).connect(this.ctx.destination);
-            osc.start(); osc.stop(now + 1.6);
+            this.createTone(this.freqs[i], 0.4, 0.1, now, 'sine');          // Tono base
+            this.createTone(this.freqs[i] * 2.756, 0.2, 0.05, now, 'sine');  // Brillo metálico inarmónico
+        },
+        createTone(freq, volume, duration, start, type) {
+            const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+            o.type = type; o.frequency.setValueAtTime(freq, start);
+            g.gain.setValueAtTime(0, start);
+            g.gain.linearRampToValueAtTime(volume, start + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.001, start + duration + 1);
+            o.connect(g).connect(this.ctx.destination);
+            o.start(start); o.stop(start + duration + 1.2);
         }
     };
 
@@ -225,15 +267,17 @@
     async function playSequence() {
         active = false; nIdx = 0;
         document.getElementById(`s-${pIdx}`).classList.add('now');
-        document.getElementById('hint-text').innerText = "🎧 ¡Escucha!";
+        msg("🎧 ¡Escucha la melodía!", false);
         await new Promise(r => setTimeout(r, 1000));
         for (let note of currentSong[pIdx]) {
             triggerKey(note, 400);
             await new Promise(r => setTimeout(r, 600));
         }
         active = true;
-        document.getElementById('hint-text').innerText = "🎹 ¡Tu turno!";
+        msg("🎹 ¡Tu turno!", false);
     }
+
+    function msg(t, err) { const h = document.getElementById('hint-text'); h.innerText = t; h.style.color = err ? "#f44336" : "var(--navy-blue)"; }
 
     function triggerKey(i, time) {
         AudioEngine.play(i);
@@ -243,27 +287,33 @@
     }
 
     document.querySelectorAll('.note-wrapper').forEach(btn => {
-        btn.addEventListener('pointerdown', () => {
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
             if (!active) return;
             const n = parseInt(btn.dataset.id);
             triggerKey(n, 150);
             if (n === currentSong[pIdx][nIdx]) {
                 nIdx++;
+                msg("🌟 ¡Vas muy bien!", false);
                 if (nIdx === currentSong[pIdx].length) {
                     active = false;
                     document.getElementById(`s-${pIdx}`).className = 'star done';
                     pIdx++;
                     if (pIdx === currentSong.length) {
-                        confetti();
-                        document.getElementById('hint-text').innerText = "🏆 ¡EXCELENTE!";
-                        setTimeout(() => location.reload(), 4000);
+                        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                        msg("🌈 ¡INCREÍBLE! ERES UN ARTISTA 🌈", false);
+                        setTimeout(() => location.reload(), 5000);
                     } else {
-                        setTimeout(playSequence, 1000);
+                        setTimeout(playSequence, 1200);
                     }
                 }
             } else {
-                nIdx = 0;
-                document.getElementById('hint-text').innerText = "❌ ¡Inténtalo de nuevo!";
+                document.getElementById('instrument-case').classList.add('shake');
+                setTimeout(() => document.getElementById('instrument-case').classList.remove('shake'), 400);
+                msg("💡 ¡Casi! Reintentando la frase...", true);
+                nIdx = 0; // Reinicia la nota de la frase actual.
+                active = false;
+                setTimeout(playSequence, 1200); // Repite la frase tras pausa pedagógica
             }
         });
     });
