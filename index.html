@@ -25,7 +25,7 @@
             display: flex; flex-direction: column;
         }
 
-        /* --- HEADER CON LOGOS EN LAS ESQUINAS --- */
+        /* --- HEADER --- */
         header {
             position: relative;
             height: 130px; 
@@ -39,33 +39,24 @@
         }
 
         .membrete-escuela { 
-            position: absolute;
-            left: 15px;
-            top: 15px;
-            height: 90px;
-            width: auto;
-            object-fit: contain;
+            position: absolute; left: 15px; top: 15px;
+            height: 90px; width: auto; object-fit: contain;
         }
 
         .logo-sea { 
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            height: 90px;
-            width: auto;
-            object-fit: contain;
+            position: absolute; right: 15px; top: 15px;
+            height: 90px; width: auto; object-fit: contain;
         }
 
         #btn-back {
-            position: absolute;
-            top: 15px;
+            position: absolute; top: 15px;
             background: #ff5252; color: white; border: none; padding: 8px 18px;
             border-radius: 20px; font-weight: 800; cursor: pointer; 
             box-shadow: 0 4px #c62828; z-index: 110;
         }
         #btn-back:active { transform: translateY(2px); box-shadow: 0 1px #c62828; }
 
-        /* --- MENÚ PRINCIPAL --- */
+        /* --- MENÚ PRINCIPAL Y ANIMACIÓN DE NUBES --- */
         #menu-overlay {
             position: fixed; inset: 130px 0 0 0; background: var(--light-blue);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -84,7 +75,12 @@
             background: white; border-radius: 100px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            /* Animación suave y elástica para las nubes */
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+        }
+        .cloud-btn:hover { 
+            transform: scale(1.08) translateY(-5px); 
+            box-shadow: 0 15px 25px rgba(0,0,0,0.15);
         }
         .cloud-btn::before, .cloud-btn::after {
             content: ''; position: absolute; background: white; border-radius: 50%;
@@ -168,38 +164,60 @@
     const AudioEngine = {
         ctx: null,
         freqs: [523.25, 587.33, 659.25, 698.46, 783.99, 880.00, 987.77, 1046.50],
-        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+        init() { 
+            if(!this.ctx) {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)(); 
+            }
+        },
         play(i) {
             this.init();
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+            
             const now = this.ctx.currentTime;
             
-            // --- SONIDO METALÓFONO MEJORADO ---
-            // 1. Cuerpo de la nota (Onda Triángulo para calidez)
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(this.freqs[i], now);
+            // 1. Tono Base Puro (Sine)
+            const osc1 = this.ctx.createOscillator();
+            const gain1 = this.ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(this.freqs[i], now);
             
-            // 2. El "Clink" metálico (Armónico alto)
-            const attack = this.ctx.createOscillator();
-            const attackGain = this.ctx.createGain();
-            attack.type = 'sine';
-            attack.frequency.setValueAtTime(this.freqs[i] * 2, now); // Octava arriba
+            // 2. Resonancia Metálica (Armónico inarmónico característico de placas de metal)
+            const osc2 = this.ctx.createOscillator();
+            const gain2 = this.ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(this.freqs[i] * 2.756, now); 
+            
+            // 3. Golpe de la baqueta (Impacto cortísimo y agudo)
+            const osc3 = this.ctx.createOscillator();
+            const gain3 = this.ctx.createGain();
+            osc3.type = 'square';
+            osc3.frequency.setValueAtTime(this.freqs[i] * 4, now);
 
-            gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.6, now + 0.01); // Ataque rápido
-            gain.gain.exponentialRampToValueAtTime(0.01, now + 1.2); // Sostenido largo
+            // --- Envolventes de Volumen ---
+            
+            // Tono base (Volumen principal, ataque rápido, caída sostenida larga)
+            gain1.gain.setValueAtTime(0, now);
+            gain1.gain.linearRampToValueAtTime(0.7, now + 0.015);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
 
-            attackGain.gain.setValueAtTime(0.3, now);
-            attackGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); // El clink desaparece rápido
+            // Resonancia metálica (Menor volumen, decae más rápido)
+            gain2.gain.setValueAtTime(0, now);
+            gain2.gain.linearRampToValueAtTime(0.25, now + 0.01);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
 
-            osc.connect(gain).connect(this.ctx.destination);
-            attack.connect(attackGain).connect(this.ctx.destination);
+            // Golpe (Ataque ultra rápido, desaparece casi al instante)
+            gain3.gain.setValueAtTime(0, now);
+            gain3.gain.linearRampToValueAtTime(0.08, now + 0.005);
+            gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
 
-            osc.start(now);
-            attack.start(now);
-            osc.stop(now + 1.3);
-            attack.stop(now + 0.2);
+            // Conectar al destino (Altavoces)
+            osc1.connect(gain1).connect(this.ctx.destination);
+            osc2.connect(gain2).connect(this.ctx.destination);
+            osc3.connect(gain3).connect(this.ctx.destination);
+
+            // Iniciar y detener
+            osc1.start(now); osc2.start(now); osc3.start(now);
+            osc1.stop(now + 2.6); osc2.stop(now + 1.3); osc3.stop(now + 0.1);
         }
     };
 
